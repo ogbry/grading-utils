@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const fs = require('fs');
 const path = require('path');
 const Jasmine = require('jasmine');
 const glob = require('glob');
@@ -18,10 +19,10 @@ const config = {
 
 function runTests(dir) {
   const jasmine = new Jasmine();
+  const reporter = new Reporter();
 
   jasmine.clearReporters();
-  jasmine.addReporter(new Reporter());
-
+  jasmine.addReporter(reporter);
   jasmine.loadConfig({
     spec_dir: path.join(dir, 'test'),
     // Had to find the absolute paths myself because jasmine couldn't seem to
@@ -30,11 +31,34 @@ function runTests(dir) {
     random: false,
   });
 
-  jasmine.execute();
+  return new Promise((resolve, reject) => {
+    jasmine.execute();
+    jasmine.onComplete(status => {
+      resolve(reporter.results);
+    });
+  });
+}
+
+function parseUser(dir) {
+  return JSON.parse(fs.readFileSync(path.join(dir, 'user.json')));
 }
 
 (function main({ dirs }) {
-  dirs.split('\n').forEach(dir => {
-    runTests(dir);
+  const grades = {};
+  dirs.split('\n').forEach(async dir => {
+    const user = parseUser(dir);
+
+    try {
+      let results = await runTests(dir);
+      results.name = user.name;
+      grades[user.email] = results;
+    } catch (e) {
+      grades[user.email] = {
+        name: user.name,
+        failure: e.message,
+      };
+    }
+
+    console.log(JSON.stringify(grades));
   });
 })(config);
