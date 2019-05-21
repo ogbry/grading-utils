@@ -16,7 +16,7 @@ const argv = require('yargs')
     alias: 'd',
     describe: 'a newline delimited string of directories',
     demandOption: true,
-    type: 'string',
+    type: 'array',
   }).argv;
 
 const config = {
@@ -72,7 +72,7 @@ function getPNG(filePath) {
     const referencePNG = await getPNG(referenceImage);
     const browser = await puppeteer.launch();
 
-    for (let repoPath of repos.split('/n')) {
+    for (let repoPath of repos) {
       const diffPercentage = await getDiffPercentage(browser, referencePNG, repoPath);
       const user = JSON.parse(fs.readFileSync(`${repoPath}/user.json`))
       results[user.email] = {
