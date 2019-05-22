@@ -36,13 +36,17 @@ const config = {
 
 async function downloadRepoArchives(outputDir, archConfigs) {
   archConfigs.forEach(async config => {
-    const outputPath = path.resolve(
-      outputDir,
-      `${config.owner}_${config.repo}.tar.gz`
-    );
-    const repoArchive = await github.repos.getArchiveLink(config);
-    await writeFileAsync(outputPath, repoArchive.data);
-    console.log(outputPath);
+    try {
+      const outputPath = path.resolve(
+        outputDir,
+        `${config.owner}_${config.repo}.tar.gz`
+      );
+      const repoArchive = await github.repos.getArchiveLink(config);
+      await writeFileAsync(outputPath, repoArchive.data);
+      console.log(outputPath);
+    } catch (e) {
+      throw e;
+    }
   });
 }
 
@@ -51,7 +55,7 @@ function parseRepoUrl(url) {
   return {
     owner: path[1],
     name: path[2],
-  }
+  };
 }
 
 (async function({ repo, branch, outputDir }) {
@@ -60,26 +64,26 @@ function parseRepoUrl(url) {
     path.resolve(outputDir)
   );
 
-  const repoData = parseRepoUrl(repo);
-
-  const finalRepoPulls = await github.pulls.list({
-    owner: repoData.owner,
-    repo: repoData.name,
-    state: 'open',
-    sort: 'created',
-    per_page: 100,
-  });
-
-  const prRepos = finalRepoPulls.data.map(pr => {
-    return {
-      owner: pr.user.login,
-      repo: pr.head.repo.name,
-      archive_format: 'tarball',
-      ref: branch,
-    };
-  });
-
   try {
+    const repoData = parseRepoUrl(repo);
+
+    const finalRepoPulls = await github.pulls.list({
+      owner: repoData.owner,
+      repo: repoData.name,
+      state: 'open',
+      sort: 'created',
+      per_page: 100,
+    });
+
+    const prRepos = finalRepoPulls.data.map(pr => {
+      return {
+        owner: pr.user.login,
+        repo: pr.head.repo.name,
+        archive_format: 'tarball',
+        ref: branch,
+      };
+    });
+
     await downloadRepoArchives(outputDir, prRepos);
   } catch (e) {
     console.error(e);

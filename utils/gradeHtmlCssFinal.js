@@ -42,14 +42,17 @@ async function getDiffPercentage(browser, referencePNG, dir) {
   });
 
   const renderedPNG = await getPNG(renderedPNGPath);
+  const diffPNG = new PNG({ width: referencePNG.width, height: referencePNG.height });
   const mismatched = pMatch(
     referencePNG.data,
     renderedPNG.data,
-    null,
+    diffPNG.data,
     referencePNG.width,
     referencePNG.height
   );
   await page.close();
+  console.error(mismatched);
+  diffPNG.pack().pipe(fs.createWriteStream(`${dir}/diff.png`));
   return (mismatched / (referencePNG.width * referencePNG.height)) * 100;
 }
 
@@ -72,6 +75,7 @@ function getPNG(filePath) {
     const referencePNG = await getPNG(referenceImage);
     const browser = await puppeteer.launch();
 
+    console.log('REPOS: ', repos)
     for (let repoPath of repos) {
       const diffPercentage = await getDiffPercentage(browser, referencePNG, repoPath);
       const user = JSON.parse(fs.readFileSync(`${repoPath}/user.json`))
