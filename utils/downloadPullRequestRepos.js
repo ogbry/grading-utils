@@ -16,7 +16,7 @@ const argv = require('yargs')
     type: 'string',
   })
   .option('repo', {
-    alias: 'r',
+    alias: 'r', 
     describe: 'github repository url',
     demandOption: true,
     type: 'string',
