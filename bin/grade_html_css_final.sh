@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+# output_dir='/grading-utils/bin'
+# TMPDIR='/grading-utils/repos'
+# branch='master'
+# repo='https://github.com/boomcamp/html-layouts-2'
+# reference_image='/grading-utils/download.png'
+
+
 set -euo pipefail
 
 errcho() {
@@ -47,5 +54,5 @@ errcho "Repos will be output to $output_dir"
   | xargs -I{} tar -xf {} -C "$output_dir"
 
 ../utils/gradeHtmlCssFinal.js \
-  --directories "$(find "$output_dir" -type d -depth 1)" \
+  --directories "$(find "$output_dir" -maxdepth 1 -type d)" \
   --reference "$reference_image"

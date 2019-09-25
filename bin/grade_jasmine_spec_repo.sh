@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 set -euo pipefail
 
 errcho() {
@@ -42,4 +43,4 @@ errcho "Repos will be output to $output_dir"
   | xargs -I{} tar -xf {} -C "$output_dir"
 
 ../utils/gradeJasmineSpecRepo.js \
-  --directories "$(find "$output_dir" -type d -depth 1)" \
+  --directories "$(find "$output_dir" -maxdepth 1 -type d)" \

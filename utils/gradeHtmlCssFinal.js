@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
@@ -73,7 +74,7 @@ function getPNG(filePath) {
 
   try {
     const referencePNG = await getPNG(referenceImage);
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
 
     console.log('REPOS: ', repos)
     for (let repoPath of repos) {
